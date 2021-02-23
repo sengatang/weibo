@@ -14,7 +14,7 @@ from weibo.items import WeiboItem
 
 class SearchSpider(scrapy.Spider):
     name = 'search'
-    allowed_domains = ['weibo.com']
+    allowed_domains = ['weibo.com', 'weibo.cn']
     settings = get_project_settings()
     keyword_list = settings.get('KEYWORD_LIST')
     if not isinstance(keyword_list, list):
@@ -31,6 +31,7 @@ class SearchSpider(scrapy.Spider):
     contain_type = util.convert_contain_type(settings.get('CONTAIN_TYPE'))
     regions = util.get_regions(settings.get('REGION'))
     base_url = 'https://s.weibo.com'
+
     start_date = settings.get('START_DATE',
                               datetime.now().strftime('%Y-%m-%d'))
     end_date = settings.get('END_DATE', datetime.now().strftime('%Y-%m-%d'))
@@ -355,7 +356,7 @@ class SearchSpider(scrapy.Spider):
                 weibo['id'] = sel.xpath('@mid').extract_first()
                 weibo['bid'] = sel.xpath(
                     '(.//p[@class="from"])[last()]/a[1]/@href').extract_first(
-                    ).split('/')[-1].split('?')[0]
+                ).split('/')[-1].split('?')[0]
                 weibo['user_id'] = info[0].xpath(
                     'div[2]/a/@href').extract_first().split('?')[0].split(
                         '/')[-1]
@@ -426,7 +427,7 @@ class SearchSpider(scrapy.Spider):
                                             if attitudes_count else '0')
                 created_at = sel.xpath(
                     '(.//p[@class="from"])[last()]/a[1]/text()').extract_first(
-                    ).replace(' ', '').replace('\n', '').split('前')[0]
+                ).replace(' ', '').replace('\n', '').split('前')[0]
                 weibo['created_at'] = util.standardize_date(created_at)
                 source = sel.xpath('(.//p[@class="from"])[last()]/a[2]/text()'
                                    ).extract_first()
@@ -506,7 +507,7 @@ class SearchSpider(scrapy.Spider):
                                                   if attitudes_count else '0')
                     created_at = retweet_sel[0].xpath(
                         './/p[@class="from"]/a[1]/text()').extract_first(
-                        ).replace(' ', '').replace('\n', '').split('前')[0]
+                    ).replace(' ', '').replace('\n', '').split('前')[0]
                     retweet['created_at'] = util.standardize_date(created_at)
                     source = retweet_sel[0].xpath(
                         './/p[@class="from"]/a[2]/text()').extract_first()
@@ -516,5 +517,23 @@ class SearchSpider(scrapy.Spider):
                     retweet['retweet_id'] = ''
                     yield {'weibo': retweet, 'keyword': keyword}
                     weibo['retweet_id'] = retweet['id']
-                print(weibo)
-                yield {'weibo': weibo, 'keyword': keyword}
+                
+                url = 'https://weibo.cn/comment/{}?page=1'.format(weibo['bid'])
+                yield scrapy.Request(url, self.get_sub_comment, meta={
+                    'item': weibo, 
+                    'keyword': keyword
+                    })
+
+
+    def get_sub_comment(self, response):
+        weibo = response.meta['item']
+        comment_list = response.xpath("//div[starts-with(@id, 'C_')]")
+        comment_list = comment_list[:5] if comment_list else []
+        comment_str_list = []
+        for comment in comment_list:
+            comment_text = comment.xpath("span[@class='ctt']/text()").extract_first() or ""
+            comment_attitude = comment.xpath("//a[starts-with(@href, '/attitude')]/text()").extract_first() or ""
+            comment_str_list.append("{},{}".format(comment_text, comment_attitude))
+        weibo['comment'] = "\n".join(comment_str_list)
+        print(weibo)
+        yield {'weibo': weibo, 'keyword': response.meta['keyword']}
