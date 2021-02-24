@@ -519,21 +519,19 @@ class SearchSpider(scrapy.Spider):
                     weibo['retweet_id'] = retweet['id']
                 
                 url = 'https://weibo.cn/comment/{}?page=1'.format(weibo['bid'])
-                yield scrapy.Request(url, self.get_sub_comment, meta={
-                    'item': weibo, 
-                    'keyword': keyword
-                    })
+                print(weibo)
+                yield {'weibo': weibo, 'keyword': keyword}
 
 
-    def get_sub_comment(self, response):
-        weibo = response.meta['item']
-        comment_list = response.xpath("//div[starts-with(@id, 'C_')]")
-        comment_list = comment_list[:5] if comment_list else []
-        comment_str_list = []
-        for comment in comment_list:
-            comment_text = comment.xpath("span[@class='ctt']/text()").extract_first() or ""
-            comment_attitude = comment.xpath("//a[starts-with(@href, '/attitude')]/text()").extract_first() or ""
-            comment_str_list.append("{},{}".format(comment_text, comment_attitude))
-        weibo['comment'] = "\n".join(comment_str_list)
-        print(weibo)
-        yield {'weibo': weibo, 'keyword': response.meta['keyword']}
+    # def get_sub_comment(self, response):
+    #     weibo = response.meta['item']
+    #     comment_list = response.xpath("//div[starts-with(@id, 'C_')]")
+    #     comment_list = comment_list[:5] if comment_list else []
+    #     comment_str_list = []
+    #     for comment in comment_list:
+    #         comment_text = comment.xpath("span[@class='ctt']/text()").extract_first() or ""
+    #         comment_attitude = comment.xpath("//a[starts-with(@href, '/attitude')]/text()").extract_first() or ""
+    #         comment_str_list.append("{},{}".format(comment_text, comment_attitude))
+    #     weibo['comment'] = "\n".join(comment_str_list)
+    #     print(weibo)
+    #     yield {'weibo': weibo, 'keyword': response.meta['keyword']}

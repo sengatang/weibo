@@ -8,9 +8,8 @@ TELNETCONSOLE_ENABLED = False
 LOG_LEVEL = 'ERROR'
 # 访问完一个页面再访问下一个时需要等待的时间，默认为10秒
 DOWNLOAD_DELAY = 2
-CONCURRENT_REQUESTS = 100
-CONCURRENT_REQUESTS_PER_DOMAIN = 100
-CONCURRENT_REQUESTS_PER_IP = 100
+CONCURRENT_REQUESTS = 16
+
 DEFAULT_REQUEST_HEADERS = {
     'Accept':
     'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -19,9 +18,9 @@ DEFAULT_REQUEST_HEADERS = {
 }
 ITEM_PIPELINES = {
     'weibo.pipelines.DuplicatesPipeline': 300,
-    'weibo.pipelines.CsvPipeline': 301,
+    # 'weibo.pipelines.CsvPipeline': 301,
     # 'weibo.pipelines.MysqlPipeline': 302,
-    # 'weibo.pipelines.MongoPipeline': 303,
+    'weibo.pipelines.MongoPipeline': 303,
     # 'weibo.pipelines.MyImagesPipeline': 304,
     # 'weibo.pipelines.MyVideoPipeline': 305
 }
@@ -47,7 +46,8 @@ IMAGES_STORE = './'
 # 视频文件存储路径
 FILES_STORE = './'
 # 配置MongoDB数据库
-# MONGO_URI = 'localhost'
+MONGO_URI = 'localhost'
+
 # 配置MySQL数据库，以下为默认配置，可以根据实际情况更改，程序会自动生成一个名为weibo的数据库，如果想换其它名字请更改MYSQL_DATABASE值
 # MYSQL_HOST = 'localhost'
 # MYSQL_PORT = 3306
