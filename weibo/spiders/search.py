@@ -519,7 +519,7 @@ class SearchSpider(scrapy.Spider):
                     weibo['retweet_id'] = retweet['id']
                 
                 url = 'https://weibo.cn/comment/{}?page=1'.format(weibo['bid'])
-                print(weibo)
+                # print(weibo)
                 yield {'weibo': weibo, 'keyword': keyword}
 
 
