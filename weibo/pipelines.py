@@ -93,7 +93,11 @@ class MongoPipeline(object):
     def open_spider(self, spider):
         try:
             from pymongo import MongoClient
-            self.client = MongoClient(settings.get('MONGO_URI'))
+            self.client = MongoClient(
+                host = settings.get('MONGO_HOST'),
+                username = settings.get('MONGO_USER'),
+                password = settings.get('MONGO_PSW')
+            )
             self.db = self.client['weibo']
             self.collection = self.db['weibo']
         except ModuleNotFoundError:

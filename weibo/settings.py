@@ -47,7 +47,9 @@ IMAGES_STORE = './'
 # 视频文件存储路径
 FILES_STORE = './'
 # 配置MongoDB数据库
-MONGO_URI = 'localhost'
+MONGO_HOST = 'localhost:27017'
+MONGO_USER = ''
+MONGO_PSW = ''
 
 # 配置MySQL数据库，以下为默认配置，可以根据实际情况更改，程序会自动生成一个名为weibo的数据库，如果想换其它名字请更改MYSQL_DATABASE值
 # MYSQL_HOST = 'localhost'
